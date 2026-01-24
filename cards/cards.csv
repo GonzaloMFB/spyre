@@ -1,0 +1,6 @@
+name|card_type|color|rarity|cost|base_values|functions|keywords|description
+strike|attack|red|common|1|"6"|damage||"Deal {} damage."
+defend|skill|red|common|1|"5"|block||"Deal {} damage."
+inflame|power|red|uncommon|1|"2"|str_buff||"Deal {} damage."
+bash|attack|red|common|2|"8,2"|"damage,vulnerable"||"Deal {} damage. Apply {} Vulnerable."
+carnage|attack|red|uncommon|2|"20"|"damage"|"exhaust"|"Deal {} damage."
