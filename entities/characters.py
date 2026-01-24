@@ -1,93 +1,55 @@
-class Character:
-    def __init__(self):
-        self.stats = {
-            "str": 0,
-            "dex": 0,
-        }
-        self.temp_stats = {}
-        self.powers = {}
-        self.name = ""
-        self.color = ""
-        self._max_hp = 60
-        self._current_hp = self._max_hp
-
-    # =============== HP ===============
-    @property
-    def max_hp(self):
-        return self._max_hp
-
-    @property
-    def current_hp(self):
-        return self._current_hp
-
-    @current_hp.setter
-    def current_hp(self, val):
-        if val < 0:
-            raise ValueError("current_hp must be a positive int")
-        self._current_hp = min(self.max_hp, val)
-
-    @max_hp.setter
-    def max_hp(self, val: int):
-        if val < 1:
-            raise ValueError("max_hp must be at least 1")
-        self._max_hp = val
-        self.current_hp = min(self._max_hp, self.current_hp)
-
-    def damage(self, val: int):
-        self.current_hp -= val
-
-    def heal(self, val: int):
-        self.current_hp += val
-
-    # ============= Stats ==============
-
-    def _check_stat(self, stat):
-        if stat not in self.stats:
-            raise ValueError(f"Unknown stat: {stat}")
-        return True
-
-    def add_to_stat(self, stat, amount):
-        self._check_stat(stat)
-        self.stats[stat] += amount
-
-    def set_stat(self, stat: str, quantity: int):
-        self._check_stat(stat)
-        self.stats[stat] = quantity
-
-    def get_stat(self, stat: str):
-        self._check_stat(stat)
-        return self.stats[stat]
-
-    def get_temp_stat(self, temp_stat: str):
-        """
-        temp stats are mutable.
-        """
-        return self.temp_stats.get(temp_stat)
-
-    def add_temp_stat(self, temp_stat: str, quantity: int):
-        """
-        Adds to temp stats (e.g. vulnerable, weak) that can appear/disappear.
-        """
-        val = self.temp_stats.get(temp_stat, 0) + quantity
-        self.temp_stats[temp_stat] = val
-        # Clean temporary stat if it becomes 0
-        if self.temp_stats[temp_stat] <= 0:
-            self.remove_temp_stat(temp_stat)
-
-    def remove_temp_stat(self, temp_stat: str):
-        self.temp_stats.pop(temp_stat, None)
+import csv
+import os
+from copy import deepcopy
+from entity import Entity
 
 
-class KnightChar(Character):
-    def __init__(self):
-        super().__init__()
-        self.name = "knight"
-        self.color = "red"
-        self._max_hp = 80
-        self._current_hp = self._max_hp
+DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-c = KnightChar()
+class Character(Entity):
+    def __init__(self, name, color, base_hp):
+        super().__init__(base_hp)
+        self.name = name
+        self.color = color
+
+
+def load_character_data():
+    """
+    Loads character data in memory
+    """
+    data = {}
+    char_path = os.path.join(DIR, "characters.csv")
+    with open(char_path, "r", newline="\n") as reader:
+        fieldnames = next(reader).strip().split("|")
+        char_data = csv.DictReader(reader, fieldnames=fieldnames, delimiter="|")
+        for char in char_data:
+            name = char.pop("name")
+            data[name] = char
+    return data
+
+
+char_data = load_character_data()
+
+
+def generate_char(name: str):
+    """
+    Docstring for generate_card
+
+    :param name: Cbaracter name, which is used to get the template from card_data
+    """
+    if name not in char_data:
+        raise ValueError(f"Unknown character: {name}")
+    print(f"Generating charater: {name.title()}.")
+
+    template = char_data[name]
+    instance_data = deepcopy(template)
+    return Character(name=name, **instance_data)
+
+
+print(char_data)
+
+c = Character("knight", **deepcopy(char_data["knight"]))
 print(c.get_stat("str"))
 c.set_stat("str", 5)
 c.add_to_stat("dex", 1)

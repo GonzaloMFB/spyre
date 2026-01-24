@@ -1,6 +1,5 @@
 import csv
 import os
-
 from copy import deepcopy
 
 DIR = os.path.dirname(os.path.abspath(__file__))
