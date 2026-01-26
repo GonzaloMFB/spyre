@@ -34,9 +34,8 @@ char_data = load_character_data()
 
 def generate_char(name: str):
     """
-    Docstring for generate_card
-
-    :param name: Cbaracter name, which is used to get the template from card_data
+    Character factory.
+    :param name: Character name, which is used to get the template from card_data
     """
     if name not in char_data:
         raise ValueError(f"Unknown character: {name}")
