@@ -7,7 +7,7 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class Enemy(Entity):
-    def __init__(self, name, base_hp):
+    def __init__(self, name, base_hp, behavior):
         super().__init__(base_hp)
         self.name = name
 
