@@ -1,4 +1,5 @@
-venv
-design.md
-TODO.md
 __pycache__/
+assets
+design.md
+venv
+TODO.md

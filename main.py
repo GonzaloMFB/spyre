@@ -1,6 +1,9 @@
 import pygame
-import time
+import os
 from dataclasses import dataclass, asdict
+from entities.characters import generate_char
+
+DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 @dataclass
@@ -65,17 +68,38 @@ def render_game_state():
         y += 16
 
 
-def render():
-    pass
+def render_room():
+    """Render using placeholder assets. For testing only."""
+    bg = pygame.image.load(os.path.join(DIR, "assets/placeholder_room.png"))
+    screen.blit(bg, (0, 0))
 
+
+def render_player():
+    """Render using placeholder assets. For testing only."""
+    bg = pygame.image.load(os.path.join(DIR, "assets/placeholder_player.png"))
+    bg = bg.convert()
+    bg.set_colorkey((255, 255, 255))
+    screen.blit(bg, (screen.get_width() // 4, screen.get_height() // 4))
+
+
+def render_enemy():
+    """Render using placeholder assets. For testing only."""
+    bg = pygame.image.load(os.path.join(DIR, "assets/placeholder_enemy.png"))
+    bg = bg.convert()
+    bg.set_colorkey((255, 255, 255))
+    screen.blit(bg, (3 * screen.get_width() // 4, 2 * screen.get_height() // 4))
+
+
+player = generate_char("knight")
 
 while game_state.running:
     poll_events(game_state)
 
     # fill the screen to wipe last frame
-    screen.fill("gray45")
+    render_room()
+    render_player()
+    render_enemy()
 
-    render()
     render_game_state()
 
     pygame.display.flip()
