@@ -1,6 +1,7 @@
 import csv
 import os
 from copy import deepcopy
+import pygame as pg
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -44,6 +45,30 @@ class Card:
 
     def generate_description(self):
         return self.description.format(*self.base_values)
+
+    def _render_card_text(self, image: pg.surface.Surface):
+        # Cost
+        cost_txt = pg.font.SysFont("arial", 18).render(str(self.cost), True, (0, 0, 0))
+        image.blit(cost_txt, (20, 14))
+        # Name
+        name_txt = pg.font.SysFont("arial", 18).render(str(self.name), True, (0, 0, 0))
+        image.blit(name_txt, (64, 30))
+        # Type
+        type_txt = pg.font.SysFont("arial", 18).render(str(self.name), True, (0, 0, 0))
+        image.blit(type_txt, (90, 135))
+        # Description
+        desc_txt = self.generate_description()
+        type_txt = pg.font.SysFont("arial", 18).render(desc_txt, True, (0, 0, 0))
+        image.blit(type_txt, (50, 180))
+        return image
+
+    def render_card(self):
+        bg = pg.image.load(os.path.join(DIR, "../assets/placeholder_card.png"))
+        bg = bg.convert()
+        bg.set_colorkey((255, 255, 255))
+        # Render blit image text on top of the surface.
+        bg = self._render_card_text(bg)
+        return bg
 
 
 def load_card_data():

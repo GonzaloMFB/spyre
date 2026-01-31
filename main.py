@@ -1,7 +1,8 @@
 import pygame
 import os
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from entities.characters import generate_char
+from cards.cards import generate_card
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -11,6 +12,9 @@ class GameState:
     running: bool = True
     user_turn: bool = True  # flips every single turn
     user_energy: int = 0
+    draw_pile: list = field(default_factory=list)
+    discard_pile: list = field(default_factory=list)
+    exhaust_pile: list = field(default_factory=list)
 
 
 # pygame setup
@@ -32,7 +36,6 @@ def handle_keydown(event: pygame.event.Event):
                 enemy_turn_end = pygame.event.Event(u_event, u_type=END_ENEMY_TURN)
                 pygame.time.set_timer(enemy_turn_end, 3000)
         case _:
-            print(event.key)
             return
     # Debugging
     render_game_state()
@@ -91,6 +94,7 @@ def render_enemy():
 
 
 player = generate_char("knight")
+card = generate_card("strike")
 
 while game_state.running:
     poll_events(game_state)
@@ -99,7 +103,7 @@ while game_state.running:
     render_room()
     render_player()
     render_enemy()
-
+    screen.blit(card.render_card(), (screen.get_width() // 2, screen.get_height() // 2))
     render_game_state()
 
     pygame.display.flip()
