@@ -15,6 +15,8 @@ class Character(Entity):
         self.name = name
         self.color = color
         self.deck = STARTER_DECKS.get(name, []) or []
+        self.max_energy = 3
+        self.current_energy = self.max_energy
 
 
 def load_character_data():

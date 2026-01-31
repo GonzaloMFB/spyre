@@ -20,6 +20,7 @@ class GameState:
 # pygame setup
 pygame.init()
 screen = pygame.display.set_mode((1280, 720))
+pygame.display.set_caption("S-Py-re")
 clock = pygame.time.Clock()
 game_state = GameState()
 
@@ -85,6 +86,17 @@ def render_player():
     screen.blit(bg, (screen.get_width() // 4, screen.get_height() // 4))
 
 
+def render_energy(character):
+    bg = pygame.image.load(os.path.join(DIR, "assets/placeholder_energy.png"))
+    bg = bg.convert()
+    bg.set_colorkey((255, 255, 255))
+    txt = pygame.font.SysFont("arial", 18).render(
+        f"{character.current_energy}/{character.max_energy}", True, (0, 0, 0)
+    )
+    bg.blit(txt, (bg.get_width() / 2, bg.get_height() / 4))
+    screen.blit(bg, (screen.get_width() // 4, 3 * screen.get_height() // 4))
+
+
 def render_enemy():
     """Render using placeholder assets. For testing only."""
     bg = pygame.image.load(os.path.join(DIR, "assets/placeholder_enemy.png"))
@@ -104,6 +116,7 @@ while game_state.running:
     render_player()
     render_enemy()
     screen.blit(card.render_card(), (screen.get_width() // 2, screen.get_height() // 2))
+    render_energy(player)
     render_game_state()
 
     pygame.display.flip()
