@@ -22,7 +22,9 @@ class BattleState(Enum):
     BATTLE_END = 3
 
 
-class PlayerTurn(Enum):
+class PlayerTurnState(Enum):
     TURN_START = 0
-    PLAY = 1
-    TURN_END = 2
+    SELECT_CARD = 1
+    SELECT_TARGET = 2
+    PLAY_CARD = 3
+    TURN_END = 4
