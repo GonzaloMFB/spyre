@@ -1,15 +1,21 @@
 import csv
 import os
 from copy import deepcopy
-from entity import Entity
+from entities.entity import Entity
+from behaviors.behaviors import BEHAVIOR_MAP
 
 DIR = os.path.dirname(os.path.abspath(__file__))
+
+
+def default_behavior():
+    print("Hello! I am the default behavior")
 
 
 class Enemy(Entity):
     def __init__(self, name, base_hp, behavior):
         super().__init__(base_hp)
         self.name = name
+        self.behavior = BEHAVIOR_MAP.get(behavior) or default_behavior
 
 
 def load_enemy_data():
