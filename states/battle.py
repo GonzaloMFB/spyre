@@ -232,6 +232,7 @@ clock = pygame.time.Clock()
 running = True
 
 battle = None
+active_battle = True
 
 while running:
     events = pygame.event.get()
@@ -239,10 +240,17 @@ while running:
         if event.type == pygame.QUIT:
             running = False
     screen.fill("gray45")
-    if not battle:
+    if not battle and active_battle:
         battle = BattleStateMachine(player, sample_deck)
-    render_battle_state(screen, battle)
-    battle.update(events)
+    if battle:
+        if battle.current_state == BattleState.BATTLE_END:
+            render_battle_state(screen, battle)
+            battle.update(events)
+            battle = None
+            active_battle = False
+            continue
+        render_battle_state(screen, battle)
+        battle.update(events)
 
     pygame.display.flip()
 
