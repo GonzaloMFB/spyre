@@ -1,6 +1,7 @@
 import random
 import pygame
 from entities.enemies import generate_enemy
+from cards.cards import generate_card
 from states.states import BattleState, PlayerTurnState
 
 
@@ -10,25 +11,31 @@ class BattleStateMachine:
         self.setup_done = False
         self.deck = deck
         self.enemies = []
+        self.selected_card = None
+        self.target_enemy = None
         self.player_turn_state = PlayerTurnState.TURN_START
 
-    def update(self):
+    def update(self, events: list[pygame.event.Event]):
         if self.current_state == BattleState.BATTLE_START:
-            self._battle_start()
+            self._battle_start(events)
         elif self.current_state == BattleState.PLAYER_TURN:
-            self._player_turn()
+            self._player_turn(events)
         elif self.current_state == BattleState.ENEMY_TURN:
-            self._enemy_turn()
+            self._enemy_turn(events)
         elif self.current_state == BattleState.BATTLE_END:
-            self._battle_end()
+            self._battle_end(events)
 
-    def _battle_start(self):
+    def _battle_start(self, events: list[pygame.event.Event]):
+        print("Battle start")
         if not self.setup_done:
             self.draw_pile = self.deck.copy()
             random.shuffle(self.draw_pile)
             self.discard_pile = []
             self.exhaust_pile = []
             self.hand = []
+            self.max_player_energy = 3
+            self.curr_player_energy = self.max_player_energy
+
             # Select encounter from pool.
             # In this case, we just take a default
             enemy_list = ["worm"]
@@ -37,25 +44,96 @@ class BattleStateMachine:
             self.setup_done = True
         self.current_state = BattleState.PLAYER_TURN
 
-    def _player_turn(self):
+    def _player_turn(self, events: list[pygame.event.Event]):
         if self.player_turn_state == PlayerTurnState.TURN_START:
-            self._player_turn_start()
+            self._player_turn_start(events)
         elif self.player_turn_state == PlayerTurnState.SELECT_CARD:
-            pass
+            self._select_card(events)
         elif self.player_turn_state == PlayerTurnState.SELECT_TARGET:
-            pass
+            self._select_target(events)
         elif self.player_turn_state == PlayerTurnState.PLAY_CARD:
-            pass
+            self._play_card(events)
         elif self.player_turn_state == PlayerTurnState.TURN_END:
-            pass
+            self._player_turn_end(events)
 
-    def _player_turn_start(self):
+    def _player_turn_start(self, events: list[pygame.event.Event]):
+        print("Start player turn")
+        self._draw_cards(5)
+        if not self.hand:
+            # Empty hand after even reshuffling? Game over.
+            self.player_turn_state = PlayerTurnState.TURN_END
+            self.current_state = BattleState.BATTLE_END
+        # Simple energy assignment for now
+        self.curr_player_energy = self.max_player_energy
+        self.player_turn_state = PlayerTurnState.SELECT_CARD
+
+    def _select_card(self, events: list[pygame.event.Event]):
+        for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                # Implement mouse clicking later.
+                pass
+            elif event.type == pygame.KEYDOWN:
+                if pygame.K_0 <= event.key <= pygame.K_9:
+                    # Direct selection via keyboard
+                    # Use K_1 so that K_0 picks the last one.
+                    num = event.key - pygame.K_1
+                    if len(self.hand) > num:
+                        self.selected_card = self.hand[num]
+                        print(f"Selected: {self.selected_card}")
+                        self.player_turn_state = PlayerTurnState.SELECT_TARGET
+                elif event.key == pygame.K_e:
+                    self.player_turn_state = PlayerTurnState.TURN_END
+
+    def _select_target(self, events: list[pygame.event.Event]):
+        for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                # Implement mouse clicking later.
+                pass
+            elif event.type == pygame.KEYDOWN:
+                if pygame.K_0 <= event.key <= pygame.K_9:
+                    # Direct selection via keyboard
+                    # Use K_1 so that K_0 picks the last one.
+                    num = event.key - pygame.K_1
+                    if len(self.enemies) > num:
+                        self.target_enemy = self.enemies[num]
+                        print(f"Target_enemy: {self.target_enemy}")
+                        self.player_turn_state = PlayerTurnState.PLAY_CARD
+                elif event.key == pygame.K_ESCAPE:
+                    # Clear card selection and return to SELECT_CARD
+                    self.selected_card = None
+                    self.player_turn_state = PlayerTurnState.SELECT_CARD
+
+    def _play_card(self, events: list[pygame.event.Event]):
+        # In here, we'd call the selected card logic.
+
+        # CAREFUL HERE!
+        print(f"Hand before: {self.hand}")
+        print(f"Discard pile before: {self.discard_pile}")
+        self.hand.remove(self.selected_card)  # Works if card instances are unique
+        self.discard_pile.append(self.selected_card)
+        self.selected_card = None
+        self.target_enemy = None
+        print(f"Hand after: {self.hand}")
+        print(f"Discard pile after: {self.discard_pile}")
+        self.player_turn_state = PlayerTurnState.SELECT_CARD
+
+    def _player_turn_end(self, events: list[pygame.event.Event]):
+        # Discard card if selected, just in case.
+        if self.selected_card:
+            self.hand.remove(self.selected_card)  # Works if card instances are unique
+            self.discard_pile.append(self.selected_card)
+        # Discard remaining cards on hand
+        while self.hand:
+            self.discard_pile.append(self.hand.pop())
+        # Clear selections
+        self.selected_card = None
+        self.target_enemy = None
+        self.current_state = BattleState.ENEMY_TURN
+
+    def _enemy_turn(self, events):
         pass
 
-    def _enemy_turn(self):
-        pass
-
-    def _battle_end(self):
+    def _battle_end(self, events):
         pass
 
     def _draw_cards(self, draw_num: int):
@@ -67,7 +145,10 @@ class BattleStateMachine:
             return
         for _ in range(draw_num):
             if self.draw_pile:
-                self.hand.append(self.draw_pile.pop())
+                if len(self.hand) < 10:
+                    self.hand.append(self.draw_pile.pop())
+                else:
+                    self.discard_pile.append(self.draw_pile.pop())
 
     def _reshuffle(self):
         for _ in range(len(self.discard_pile)):
@@ -82,7 +163,16 @@ def render_debug_text(text):
 def render_battle_state(screen, battle_sm: BattleStateMachine):
     x = 10
     screen.blit(render_debug_text(str(battle_sm.current_state)), (x, 0))
+    screen.blit(render_debug_text(str(battle_sm.player_turn_state)), (x, 16))
+    screen.blit(render_debug_text(f"Card: {battle_sm.selected_card}"), (x, 32))
+    screen.blit(render_debug_text(f"Target: {battle_sm.target_enemy}"), (x, 48))
 
+
+sample_deck = [
+    generate_card("strike"),
+    generate_card("defend"),
+    generate_card("bash"),
+]
 
 # pygame setup
 pygame.init()
@@ -93,14 +183,15 @@ running = True
 battle = None
 
 while running:
-    for event in pygame.event.get():
+    events = pygame.event.get()
+    for event in events:
         if event.type == pygame.QUIT:
             running = False
     screen.fill("gray45")
     if not battle:
-        battle = BattleStateMachine(["foo", "bar"])
+        battle = BattleStateMachine(sample_deck)
     render_battle_state(screen, battle)
-    battle.update()
+    battle.update(events)
 
     pygame.display.flip()
 
