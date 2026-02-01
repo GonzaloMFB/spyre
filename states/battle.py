@@ -13,7 +13,7 @@ class BattleStateMachine:
         self.deck = deck
         self.enemies: list[Enemy] = []
         self.selected_card: Card = None
-        self.target_enemy = None
+        self.target_enemy: Enemy = None
         self.player_turn_state = PlayerTurnState.TURN_START
         self.enemy_action_idx = 0
         self.player = player
@@ -111,11 +111,11 @@ class BattleStateMachine:
 
     def _play_card(self, events: list[pygame.event.Event]):
         # In here, we'd call the selected card logic.
-        self.selected_card.execute_effect()
         # CAREFUL HERE!
         self.curr_player_energy -= self.selected_card.cost
         print(f"Hand before: {self.hand}")
         print(f"Discard pile before: {self.discard_pile}")
+        self.selected_card.execute_effect(self.player, self.target_enemy)
         self.hand.remove(self.selected_card)  # Works if card instances are unique
         self.discard_pile.append(self.selected_card)
         self.selected_card = None
@@ -156,6 +156,10 @@ class BattleStateMachine:
             self.current_state = BattleState.PLAYER_TURN
 
     def _battle_end(self, events):
+        if self.player.current_hp > 0:
+            print("You win!")
+        else:
+            print("You lose...")
         # Clear everything.
         self.hand.clear()
         self.draw_pile.clear()
@@ -194,15 +198,32 @@ def render_battle_state(screen, battle_sm: BattleStateMachine):
     x = 10
     screen.blit(render_debug_text(str(battle_sm.current_state)), (x, 0))
     screen.blit(render_debug_text(str(battle_sm.player_turn_state)), (x, 16))
-    screen.blit(render_debug_text(f"Card: {battle_sm.selected_card}"), (x, 32))
-    screen.blit(render_debug_text(f"Target: {battle_sm.target_enemy}"), (x, 48))
+    if battle_sm.selected_card:
+        screen.blit(render_debug_text(f"Card: {battle_sm.selected_card.name}"), (x, 32))
+    else:
+        screen.blit(render_debug_text(f"No card selected."), (x, 32))
+    if battle_sm.target_enemy:
+        name = battle_sm.target_enemy.name
+        hp = battle_sm.target_enemy.current_hp
+        screen.blit(render_debug_text(f"Target: {name} - {hp} HP"), (x, 48))
+    else:
+        screen.blit(render_debug_text(f"No enemy selected."), (x, 48))
+    x = 1000
+    y = 0
+    for enemy in battle_sm.enemies:
+        name = enemy.name
+        hp = enemy.current_hp
+        screen.blit(render_debug_text(f"Enemy: {name} - {hp} HP"), (x, y))
+        y += 16
 
 
 sample_deck = [
     generate_card("strike"),
-    generate_card("defend"),
+    # generate_card("defend"),
     generate_card("bash"),
 ]
+
+player = generate_char("knight")
 
 # pygame setup
 pygame.init()
@@ -219,7 +240,7 @@ while running:
             running = False
     screen.fill("gray45")
     if not battle:
-        battle = BattleStateMachine(sample_deck)
+        battle = BattleStateMachine(player, sample_deck)
     render_battle_state(screen, battle)
     battle.update(events)
 

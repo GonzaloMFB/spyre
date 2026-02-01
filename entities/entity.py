@@ -12,6 +12,7 @@ class Entity:
         self.powers = {}
         self._max_hp = int(base_hp)
         self._current_hp = self._max_hp
+        self._block = 0
 
     # =============== HP ===============
     @property
@@ -21,6 +22,10 @@ class Entity:
     @property
     def current_hp(self):
         return self._current_hp
+
+    @property
+    def block(self):
+        return self._block
 
     @current_hp.setter
     def current_hp(self, val):
@@ -36,7 +41,12 @@ class Entity:
         self.current_hp = min(self._max_hp, self.current_hp)
 
     def damage(self, val: int):
-        self.current_hp -= val
+        if self.block:
+            leftover = max(0, val - self.block)
+            self.block = max(0, self.block - val)
+            self.current_hp -= leftover
+        else:
+            self.current_hp = max(self.current_hp - val, 0)
 
     def heal(self, val: int):
         self.current_hp += val

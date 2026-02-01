@@ -2,6 +2,7 @@ import csv
 import os
 from copy import deepcopy
 import pygame as pg
+from cards.card_functions import CARD_FUNC
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -70,8 +71,19 @@ class Card:
         bg = self._render_card_text(bg)
         return bg
 
-    def execute_effect(self, enemy):
-        pass
+    def execute_effect(self, player, target):
+        # Need to handle weak/vuln
+        for i in range(len(self.functions)):
+            func, needs_player, needs_target = CARD_FUNC[self.functions[i]]
+            print(f"Executing {self.functions[i]} with value {self.base_values[i]}")
+            if needs_player and needs_target:
+                func(player, target, self.base_values[i])
+            elif needs_player:
+                func(player, self.base_values[i])
+            elif needs_target:
+                func(target, self.base_values[i])
+            else:
+                func(self.base_values[i])
 
 
 def load_card_data():
