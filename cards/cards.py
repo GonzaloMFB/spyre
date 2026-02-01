@@ -31,9 +31,9 @@ class Card:
         self.card_type = card_type
         self.color = color
         self.rarity = rarity
-        self.cost = cost
+        self.cost = int(cost)
         self.functions = functions
-        self.base_values = base_values
+        self.base_values = [int(val) for val in base_values]
         if not keywords:
             self.keywords = []
         elif all([keyword in CARD_KEYWORDS for keyword in keywords]):
@@ -69,6 +69,9 @@ class Card:
         # Render blit image text on top of the surface.
         bg = self._render_card_text(bg)
         return bg
+
+    def execute_effect(self, enemy):
+        pass
 
 
 def load_card_data():

@@ -17,6 +17,11 @@ class Enemy(Entity):
         self.name = name
         self.behavior = BEHAVIOR_MAP.get(behavior) or default_behavior
 
+    def execute_intent(self):
+        # Placeholder for now.
+        print("Executing intent")
+        pass
+
 
 def load_enemy_data():
     """
