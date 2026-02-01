@@ -2,7 +2,7 @@ import csv
 import os
 from copy import deepcopy
 from entities.entity import Entity
-from behaviors.behaviors import BEHAVIOR_MAP
+from entities.enemy_intents import INTENT_MAP
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -12,15 +12,20 @@ def default_behavior():
 
 
 class Enemy(Entity):
-    def __init__(self, name, base_hp, behavior):
+    def __init__(self, name, base_hp):
         super().__init__(base_hp)
         self.name = name
-        self.behavior = BEHAVIOR_MAP.get(behavior) or default_behavior
+        self.current_intents = []
 
     def execute_intent(self):
         # Placeholder for now.
         print("Executing intent")
-        pass
+        for intent in self.current_intents:
+            name, val = intent
+            pass
+
+    def choose_intent(self):
+        self.current_intents = INTENT_MAP[self.name]()
 
 
 def load_enemy_data():

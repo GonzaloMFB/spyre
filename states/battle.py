@@ -61,6 +61,8 @@ class BattleStateMachine:
 
     def _player_turn_start(self, events: list[pygame.event.Event]):
         print("Start player turn")
+        for enemy in self.enemies:
+            enemy.choose_intent()
         self._draw_cards(5)
         if not self.hand:
             # Empty hand after even reshuffling? Game over.
@@ -88,6 +90,7 @@ class BattleStateMachine:
                         print(f"Selected: {self.selected_card}")
                         self.player_turn_state = PlayerTurnState.SELECT_TARGET
                 elif event.key == pygame.K_e:
+                    print("End turn")
                     self.player_turn_state = PlayerTurnState.TURN_END
 
     def _select_target(self, events: list[pygame.event.Event]):
@@ -141,8 +144,12 @@ class BattleStateMachine:
         self.selected_card = None
         self.target_enemy = None
         self.current_state = BattleState.ENEMY_TURN
+        # Setting player's turn to start so it won't auto end the turn again.
+        self.player_turn_state = PlayerTurnState.TURN_START
 
     def _enemy_turn(self, events):
+        print(self.current_state)
+        print(self.enemy_action_idx, len(self.enemies))
         if self.enemy_action_idx < len(self.enemies):
             enemy = self.enemies[self.enemy_action_idx]
             enemy.execute_intent()
@@ -152,6 +159,7 @@ class BattleStateMachine:
             self.enemy_action_idx += 1
         else:
             # All enemies have acted, end the turn.
+            print("Reached turn end")
             self.enemy_action_idx = 0
             self.current_state = BattleState.PLAYER_TURN
 
@@ -214,7 +222,11 @@ def render_battle_state(screen, battle_sm: BattleStateMachine):
         name = enemy.name
         hp = enemy.current_hp
         screen.blit(render_debug_text(f"Enemy: {name} - {hp} HP"), (x, y))
-        y += 16
+        for intent in enemy.current_intents:
+            name, val = intent
+            screen.blit(render_debug_text(f"Intent: {name} ({val})"), (x, y + 16))
+            y += 16
+        y += 32
 
 
 sample_deck = [
