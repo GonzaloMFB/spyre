@@ -1,12 +1,12 @@
 import random
 import pygame
 from entities.enemies import generate_enemy
-from cards.cards import generate_card
+from cards.cards import generate_card, Card
 from states.states import BattleState, PlayerTurnState
 
 
 class BattleStateMachine:
-    def __init__(self, deck: list):
+    def __init__(self, deck: list[Card]):
         self.current_state = BattleState.BATTLE_START
         self.setup_done = False
         self.deck = deck
@@ -78,6 +78,9 @@ class BattleStateMachine:
                     # Use K_1 so that K_0 picks the last one.
                     num = event.key - pygame.K_1
                     if len(self.hand) > num:
+                        if int(self.hand[num].cost) > self.curr_player_energy:
+                            print("Not enough energy!")
+                            continue
                         self.selected_card = self.hand[num]
                         print(f"Selected: {self.selected_card}")
                         self.player_turn_state = PlayerTurnState.SELECT_TARGET
@@ -107,6 +110,7 @@ class BattleStateMachine:
         # In here, we'd call the selected card logic.
 
         # CAREFUL HERE!
+        self.curr_player_energy -= int(self.selected_card.cost)
         print(f"Hand before: {self.hand}")
         print(f"Discard pile before: {self.discard_pile}")
         self.hand.remove(self.selected_card)  # Works if card instances are unique
