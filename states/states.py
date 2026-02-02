@@ -4,15 +4,13 @@ from enum import Enum
 class GameState(Enum):
     TITLE_SCREEN = 0
     CHARACTER_SELECT = 1
-    ROOM = 2
-    # ROOM SHOULD BE ABLE TO OVERLAY:
-    # BATTLE
-    # EVENT
-    # SHOP
-    # MAP
-    # CAMP, maybe
-    # SETTINGS
-    CLOSE_GAME = 3
+    MAP = 2
+    BATTLE = 3
+    REWARD = 4
+    SHOP = 5
+    EVENT = 6
+    GAME_OVER = 7
+    QUIT_GAME = 8
 
 
 class BattleState(Enum):

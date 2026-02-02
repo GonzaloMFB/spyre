@@ -23,7 +23,7 @@ python main.py
 
 ## What's Implemented
 
-TBA
+* Functional battles: the player will play cards under a certain energy cost until they defeat an enemy. Enemies will fight back following an array of intents (attacking, buffing themselves, etcetera).
 
 ## Credits
 
