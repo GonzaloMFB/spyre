@@ -4,7 +4,7 @@ from enum import Enum
 class GameState(Enum):
     TITLE_SCREEN = 0
     CHARACTER_SELECT = 1
-    MAP = 2
+    ROOM = 2
     BATTLE = 3
     REWARD = 4
     SHOP = 5

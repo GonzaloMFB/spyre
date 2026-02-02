@@ -28,7 +28,7 @@ class Map:
             layers.append(layer)
         self.layers = layers
 
-    def generate_map(self, test=True):
+    def generate_map(self, test=False):
         # Reset previous map.
         self.layers = []
         self.current_node = None
