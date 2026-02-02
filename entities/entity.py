@@ -27,6 +27,12 @@ class Entity:
     def block(self):
         return self._block
 
+    @block.setter
+    def block(self, val):
+        if val < 0:
+            raise ValueError("current_hp must be a positive int")
+        self._block = val
+
     @current_hp.setter
     def current_hp(self, val):
         if val < 0:

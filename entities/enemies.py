@@ -3,6 +3,7 @@ import os
 from copy import deepcopy
 from entities.entity import Entity
 from entities.enemy_intents import INTENT_MAP
+from entities.enemy_functions import ENEMY_FUNC
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -17,12 +18,22 @@ class Enemy(Entity):
         self.name = name
         self.current_intents = []
 
-    def execute_intent(self):
+    def execute_intent(self, player):
         # Placeholder for now.
         print("Executing intent")
         for intent in self.current_intents:
             name, val = intent
-            pass
+            print(f"{name}, {val}")
+            # Could optimize later by not passing player and enemy.
+            func, needs_user, needs_target = ENEMY_FUNC[name]
+            if needs_user and needs_target:
+                func(self, player, val)
+            elif needs_user:
+                func(self, val)
+            elif needs_target:
+                func(player, val)
+            else:
+                func(val)
 
     def choose_intent(self):
         self.current_intents = INTENT_MAP[self.name]()

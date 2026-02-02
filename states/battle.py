@@ -152,7 +152,7 @@ class BattleStateMachine:
         print(self.enemy_action_idx, len(self.enemies))
         if self.enemy_action_idx < len(self.enemies):
             enemy = self.enemies[self.enemy_action_idx]
-            enemy.execute_intent()
+            enemy.execute_intent(self.player)
             if self.player.current_hp <= 0:
                 self.current_state = BattleState.BATTLE_END
                 return
@@ -216,6 +216,9 @@ def render_battle_state(screen, battle_sm: BattleStateMachine):
         screen.blit(render_debug_text(f"Target: {name} - {hp} HP"), (x, 48))
     else:
         screen.blit(render_debug_text(f"No enemy selected."), (x, 48))
+    if battle_sm.player:
+        hp = battle_sm.player.current_hp
+        screen.blit(render_debug_text(f"Player HP: {hp}"), (x, 64))
     x = 1000
     y = 0
     for enemy in battle_sm.enemies:
