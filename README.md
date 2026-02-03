@@ -24,6 +24,7 @@ python main.py
 ## What's Implemented
 
 * Functional battles: the player will play cards under a certain energy cost until they defeat an enemy. Enemies will fight back following an array of intents (attacking, buffing themselves, etcetera).
+* Map generation: 3 to 5 random paths with interconnected nodes that the player can travel through, all the way to the boss.
 
 ## Credits
 
