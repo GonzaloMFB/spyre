@@ -1,3 +1,4 @@
+import pygame
 import random
 
 NODE_TYPES = ("fight", "shop", "event", "chest")
@@ -83,6 +84,25 @@ class Map:
             return True
         return False
 
+    def render_map(self, screen: pygame.surface.Surface):
+        """
+        Renders map on top of provided surface.
+        """
+        # To render the map, use layer and node idx
+        node_colors = {
+            "fight": "orange",
+            "event": "blue",
+            "shop": "green",
+            "boss": "black",
+        }
+        for layer_idx, layer in enumerate(self.layers):
+            for node_idx, node in enumerate(layer):
+                if not node:
+                    continue
+                vfx = pygame.surface.Surface((8, 8))
+                vfx.fill(node_colors.get(node.node_type) or "red")
+                screen.blit(vfx, ((1 + node_idx) * 16, (1 + layer_idx) * 16))
+
 
 if __name__ == "__main__":
     test_map = Map()
@@ -94,3 +114,21 @@ if __name__ == "__main__":
                 print(
                     f" Node {node}, connects to {len(node.connections)}: {node.connections}"
                 )
+
+    # pygame setup
+    pygame.init()
+    screen = pygame.display.set_mode((1280, 720))
+    clock = pygame.time.Clock()
+    running = True
+
+    while running:
+        events = pygame.event.get()
+        for event in events:
+            if event.type == pygame.QUIT:
+                running = False
+        screen.fill("gray45")
+        test_map.render_map(screen)
+        pygame.display.flip()
+        clock.tick(60)
+
+    pygame.quit()
