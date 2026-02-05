@@ -3,6 +3,9 @@ import random
 
 NODE_TYPES = ("fight", "shop", "event", "chest")
 
+NODE_SIZE = (10, 10)
+NODE_SPACE = 32
+
 
 class Node:
     def __init__(self, node_type: str):
@@ -15,6 +18,7 @@ class Map:
         # Slay the Spire organizes map nodes in Floors.
         # That's how wing boots let you travel to any Node in the floor.
         self.layers: list[list[Node]] = []
+        self.paths = []
         self.current_node: Node = None
         self.max_width = 4
         self.n_floors = 16
@@ -72,6 +76,7 @@ class Map:
                 next_node = self.layers[idx + 1][path[idx + 1]]
                 if next_node not in current_node.connections:
                     current_node.connections.append(next_node)
+        self.paths = paths
 
         # Connect boss node
         for node in self.layers[-1]:
@@ -84,13 +89,35 @@ class Map:
             return True
         return False
 
-    def render_map(self, screen: pygame.surface.Surface):
-        """
-        Renders map on top of provided surface.
-        """
+    def _render_paths(self, screen):
+        # To render paths, consider:
+        # * Iterate over paths array
+        # * In each path, the idx is the layer, the value is the node_idx
+        # * Keep track of previous
+        for idx, path in enumerate(self.paths):
+            # print(f"Path {idx}: {path}")
+            prev_x = None
+            prev_y = None
+            for layer_idx, node_idx in enumerate(path):
+                node_x = (1 + node_idx) * NODE_SPACE
+                node_y = (len(self.layers) - 1 - layer_idx) * NODE_SPACE
+                if prev_x is None and prev_y is None:
+                    node_x = (1 + node_idx) * NODE_SPACE
+                    node_y = (len(self.layers) - 1 - layer_idx) * NODE_SPACE
+                    prev_x = node_x + NODE_SIZE[0] / 2
+                    prev_y = node_y + NODE_SIZE[1] / 2
+                    continue
+                x2 = node_x + NODE_SIZE[0] / 2
+                y2 = node_y + NODE_SIZE[1] / 2
+                pygame.draw.line(screen, "black", (prev_x, prev_y), (x2, y2))
+                prev_x = x2
+                prev_y = y2
+
+    def _render_nodes(self, screen):
         # To render the map, use layer and node idx
         node_colors = {
             "fight": "orange",
+            "chest": "purple",
             "event": "blue",
             "shop": "green",
             "boss": "black",
@@ -99,9 +126,22 @@ class Map:
             for node_idx, node in enumerate(layer):
                 if not node:
                     continue
-                vfx = pygame.surface.Surface((8, 8))
+                vfx = pygame.surface.Surface(NODE_SIZE)
                 vfx.fill(node_colors.get(node.node_type) or "red")
-                screen.blit(vfx, ((1 + node_idx) * 16, (1 + layer_idx) * 16))
+                screen.blit(
+                    vfx,
+                    (
+                        (1 + node_idx) * NODE_SPACE,
+                        (len(self.layers) - 1 - layer_idx) * NODE_SPACE,
+                    ),
+                )
+
+    def render_map(self, screen: pygame.surface.Surface):
+        """
+        Renders map on top of provided surface.
+        """
+        self._render_paths(screen)
+        self._render_nodes(screen)
 
 
 if __name__ == "__main__":
@@ -111,9 +151,7 @@ if __name__ == "__main__":
         print(f"Layer {idx}:")
         for node in layer:
             if node:
-                print(
-                    f" Node {node}, connects to {len(node.connections)}: {node.connections}"
-                )
+                print(f" Node {node}, connects to {len(node.connections)}")
 
     # pygame setup
     pygame.init()
