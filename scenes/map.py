@@ -11,6 +11,8 @@ class Node:
     def __init__(self, node_type: str):
         self.connections: list[Node] = []
         self.node_type = node_type
+        # Calculated during render and used for click events.
+        self.node_pos = None
 
 
 class Map:
@@ -94,7 +96,7 @@ class Map:
         # * Iterate over paths array
         # * In each path, the idx is the layer, the value is the node_idx
         # * Keep track of previous
-        for idx, path in enumerate(self.paths):
+        for path in self.paths:
             # print(f"Path {idx}: {path}")
             prev_x = None
             prev_y = None
@@ -128,13 +130,10 @@ class Map:
                     continue
                 vfx = pygame.surface.Surface(NODE_SIZE)
                 vfx.fill(node_colors.get(node.node_type) or "red")
-                screen.blit(
-                    vfx,
-                    (
-                        (1 + node_idx) * NODE_SPACE,
-                        (len(self.layers) - 1 - layer_idx) * NODE_SPACE,
-                    ),
-                )
+                node_x = (1 + node_idx) * NODE_SPACE
+                node_y = (len(self.layers) - 1 - layer_idx) * NODE_SPACE
+                node.node_pos = (node_x, node_y)
+                screen.blit(vfx, (node_x, node_y))
 
     def render_map(self, screen: pygame.surface.Surface):
         """
@@ -147,11 +146,11 @@ class Map:
 if __name__ == "__main__":
     test_map = Map()
     test_map.generate_map(test=False)
-    for idx, layer in enumerate(test_map.layers):
-        print(f"Layer {idx}:")
-        for node in layer:
-            if node:
-                print(f" Node {node}, connects to {len(node.connections)}")
+    # for idx, layer in enumerate(test_map.layers):
+    #     print(f"Layer {idx}:")
+    #     for node in layer:
+    #         if node:
+    #             print(f" Node {node}, connects to {len(node.connections)}")
 
     # pygame setup
     pygame.init()
