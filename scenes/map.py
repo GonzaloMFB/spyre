@@ -21,7 +21,6 @@ class Map:
         # That's how wing boots let you travel to any Node in the floor.
         self.layers: list[list[Node]] = []
         self.paths = []
-        self.current_node: Node = None
         self.max_width = 4
         self.n_floors = 16
 
@@ -38,20 +37,8 @@ class Map:
     def generate_map(self, test=False):
         # Reset previous map.
         self.layers = []
-        self.current_node = None
         # Boss node has no forward connections.
         boss_node = Node("boss")
-        if test:
-            # Generate smaller map with only 1 connection for testing.
-            self.layers.append([Node("fight")])
-            for i in range(1, 4):
-                new_node = Node(NODE_TYPES[i])
-                self.layers[i - 1][0].connections.append(new_node)
-                self.layers.append([new_node])
-            self.layers[-1][0].connections.append(boss_node)
-            self.layers.append([boss_node])
-            self.current_node = self.layers[0][0]
-            return
         # Random generation. The map of each Act has 16 floors + 1 Boss battle.
         # Generate paths.
         n_paths = random.randint(3, 5)
@@ -86,8 +73,8 @@ class Map:
                 node.connections.append(boss_node)
         self.layers.append([boss_node])
 
-    def can_navigate_to(self, node: Node):
-        if node in self.current_node.connections:
+    def can_navigate_to(self, dst_node: Node, curr_node: Node):
+        if dst_node in curr_node.connections:
             return True
         return False
 
