@@ -13,7 +13,7 @@ class GameStateMachine:
         self.act_map = Map()
         self.act_map.generate_map()
         self.current_layer = 0
-        self.current_node = None
+        self.curr_node = None
 
     def update(self, events: list[pygame.event.Event]):
         # These are the ones we can open at any time.
@@ -64,8 +64,10 @@ class GameStateMachine:
         for event in events:
             if self.allow_navigation and event.type == pygame.MOUSEBUTTONDOWN:
                 clicked_node = self._get_clicked_node(event.pos)
-                if clicked_node and self.act_map.can_navigate_to(clicked_node):
-                    self.act_map.current_node = clicked_node
+                if clicked_node and self.act_map.can_navigate_to(
+                    clicked_node, self.curr_node
+                ):
+                    self.curr_node = clicked_node
                     # TODO: Transition to node state.
                     self._transition_to_node_state(clicked_node)
                     self.map_overlay_open = False

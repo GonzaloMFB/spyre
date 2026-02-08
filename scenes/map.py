@@ -74,7 +74,7 @@ class Map:
         self.layers.append([boss_node])
 
     def can_navigate_to(self, dst_node: Node, curr_node: Node):
-        if dst_node in curr_node.connections:
+        if curr_node and dst_node in curr_node.connections:
             return True
         return False
 
