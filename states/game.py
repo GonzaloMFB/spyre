@@ -62,12 +62,7 @@ class GameStateMachine:
 
     def _room(self, events: list[pygame.event.Event]):
         for event in events:
-            if event.type == pygame.KEYDOWN:
-                # Map
-                if event.key == pygame.K_m:
-                    self.map_overlay_open = not self.map_overlay_open
-                elif event.key == pygame.K_ESCAPE and self.map_overlay_open:
-                    self.map_overlay_open = False
+            self._handle_map_open(event)
 
     def _handle_map_overlay(self, events: list[pygame.event.Event]):
         for event in events:
@@ -92,6 +87,14 @@ class GameStateMachine:
             self.current_state = GameState.EVENT
         elif clicked_node.node_type == "shop":
             self.current_state = GameState.SHOP
+
+    def _handle_map_open(self, event):
+        if event.type == pygame.KEYDOWN:
+            # Map
+            if event.key == pygame.K_m:
+                self.map_overlay_open = not self.map_overlay_open
+            elif event.key == pygame.K_ESCAPE and self.map_overlay_open:
+                self.map_overlay_open = False
 
 
 def render_debug_text(text):
@@ -121,6 +124,8 @@ while running:
     if game_sm:
         render_game_state(screen, game_sm)
         game_sm.update(events)
+        if game_sm.map_overlay_open:
+            game_sm.act_map.render_map(screen)
 
     pygame.display.flip()
 
