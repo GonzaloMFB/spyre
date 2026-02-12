@@ -31,7 +31,7 @@ class GameStateMachine:
         elif self.current_state == GameState.CHARACTER_SELECT:
             self._character_select(events)
         elif self.current_state == GameState.ROOM:
-            pass
+            self._room(events)
         elif self.current_state == GameState.BATTLE:
             pass
         elif self.current_state == GameState.SHOP:
@@ -48,7 +48,7 @@ class GameStateMachine:
     def _handle_overlays(self, events: list[pygame.event.Event]):
         # Only 1 overlay open at a time
         if self.map_overlay_open:
-            self._handle_map_overlay(self, events)
+            self._handle_map_overlay(events)
         elif self.deck_overlay_open:
             pass
         elif self.settings_overlay_open:
@@ -60,9 +60,18 @@ class GameStateMachine:
     def _character_select(self, events: list[pygame.event.Event]):
         pass
 
+    def _room(self, events: list[pygame.event.Event]):
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                # Map
+                if event.key == pygame.K_m:
+                    self.map_overlay_open = not self.map_overlay_open
+                elif event.key == pygame.K_ESCAPE and self.map_overlay_open:
+                    self.map_overlay_open = False
+
     def _handle_map_overlay(self, events: list[pygame.event.Event]):
         for event in events:
-            if self.allow_navigation and event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN and self.allow_navigation:
                 clicked_node = self._get_clicked_node(event.pos)
                 if clicked_node and self.act_map.can_navigate_to(
                     clicked_node, self.curr_node
@@ -72,13 +81,6 @@ class GameStateMachine:
                     self._transition_to_node_state(clicked_node)
                     self.map_overlay_open = False
                     self.allow_navigation = False
-            elif event.type == pygame.KEYDOWN:
-                # Map can be closed with escape or M.
-                if event.key in [pygame.K_ESCAPE, pygame.K_m]:
-                    self.map_overlay_open = False
-        if self.allow_navigation:
-            # TODO: User can click on connected nodes to navigate.
-            pass
 
     def _get_clicked_node(self, mouse_pos):
         pass
@@ -92,11 +94,23 @@ class GameStateMachine:
             self.current_state = GameState.SHOP
 
 
+def render_debug_text(text):
+    return pygame.font.SysFont("arial", 18).render(text, True, (0, 0, 0))
+
+
+def render_game_state(screen, game_sm: GameStateMachine):
+    x = 10
+    screen.blit(render_debug_text(str(game_sm.current_state)), (x, 0))
+    screen.blit(render_debug_text(f"Map open? - {game_sm.map_overlay_open}"), (x, 16))
+
+
 # pygame setup
 pygame.init()
 screen = pygame.display.set_mode((1280, 720))
 clock = pygame.time.Clock()
 running = True
+
+game_sm = GameStateMachine()
 
 while running:
     events = pygame.event.get()
@@ -104,6 +118,9 @@ while running:
         if event.type == pygame.QUIT:
             running = False
     screen.fill("gray45")
+    if game_sm:
+        render_game_state(screen, game_sm)
+        game_sm.update(events)
 
     pygame.display.flip()
 
