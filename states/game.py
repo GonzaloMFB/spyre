@@ -1,6 +1,6 @@
 import pygame
 from states.states import GameState
-from scenes.map import Map, Node
+from scenes.map import Map, Node, NODE_SIZE
 
 
 class GameStateMachine:
@@ -78,7 +78,21 @@ class GameStateMachine:
                     self.allow_navigation = False
 
     def _get_clicked_node(self, mouse_pos):
-        pass
+        # Check node positions ONLY ABOVE CURRENT LAYER.
+        # No need to interact with the other nodes.
+        # Ignore last layer.
+        if self.current_layer < 15:
+            for node in self.act_map.layers[self.current_layer + 1]:
+                if not node:
+                    continue
+                if (
+                    node.node_pos[0] <= mouse_pos[0] <= node.node_pos[0] + NODE_SIZE[0]
+                ) and (
+                    node.node_pos[1] <= mouse_pos[1] <= node.node_pos[1] + NODE_SIZE[1]
+                ):
+                    print("Clicked a valid Node!")
+                    return node
+        return None
 
     def _transition_to_node_state(self, clicked_node: Node):
         if clicked_node.node_type in ["fight", "elite", "boss"]:
@@ -105,6 +119,8 @@ def render_game_state(screen, game_sm: GameStateMachine):
     x = 10
     screen.blit(render_debug_text(str(game_sm.current_state)), (x, 0))
     screen.blit(render_debug_text(f"Map open? - {game_sm.map_overlay_open}"), (x, 16))
+    pos_str = f"Current layer - {game_sm.current_layer}"
+    screen.blit(render_debug_text(pos_str), (x, 32))
 
 
 # pygame setup
@@ -125,7 +141,7 @@ while running:
         render_game_state(screen, game_sm)
         game_sm.update(events)
         if game_sm.map_overlay_open:
-            game_sm.act_map.render_map(screen)
+            game_sm.act_map.render_map(screen, game_sm.curr_node)
 
     pygame.display.flip()
 

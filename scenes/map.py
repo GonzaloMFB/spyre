@@ -102,7 +102,7 @@ class Map:
                 prev_x = x2
                 prev_y = y2
 
-    def _render_nodes(self, screen):
+    def _render_nodes(self, screen, current_node: Node):
         # To render the map, use layer and node idx
         node_colors = {
             "fight": "orange",
@@ -121,13 +121,18 @@ class Map:
                 node_y = (len(self.layers) - 1 - layer_idx) * NODE_SPACE
                 node.node_pos = (node_x, node_y)
                 screen.blit(vfx, (node_x, node_y))
+                if current_node and node in current_node.connections:
+                    # Draws marker on nodes connected to the current one.
+                    c_x = node_x + NODE_SIZE[0] / 2
+                    c_y = node_y + NODE_SIZE[1] / 2
+                    pygame.draw.circle(screen, "black", (c_x, c_y), NODE_SIZE[0] / 2)
 
-    def render_map(self, screen: pygame.surface.Surface):
+    def render_map(self, screen: pygame.surface.Surface, current_node=None):
         """
         Renders map on top of provided surface.
         """
         self._render_paths(screen)
-        self._render_nodes(screen)
+        self._render_nodes(screen, current_node)
 
 
 if __name__ == "__main__":
