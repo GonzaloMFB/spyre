@@ -74,7 +74,11 @@ class Map:
         self.layers.append([boss_node])
 
     def can_navigate_to(self, dst_node: Node, curr_node: Node):
+        if not curr_node and dst_node in self.layers[0]:
+            # Player can navigate to any node in the first layer to start.
+            return True
         if curr_node and dst_node in curr_node.connections:
+            # Player can navigate to nodes connected to the current node.
             return True
         return False
 
@@ -120,12 +124,20 @@ class Map:
                 node_x = (1 + node_idx) * NODE_SPACE
                 node_y = (len(self.layers) - 1 - layer_idx) * NODE_SPACE
                 node.node_pos = (node_x, node_y)
-                screen.blit(vfx, (node_x, node_y))
                 if current_node and node in current_node.connections:
                     # Draws marker on nodes connected to the current one.
                     c_x = node_x + NODE_SIZE[0] / 2
                     c_y = node_y + NODE_SIZE[1] / 2
-                    pygame.draw.circle(screen, "black", (c_x, c_y), NODE_SIZE[0] / 2)
+                    pygame.draw.circle(
+                        screen, "black", (c_x, c_y), NODE_SIZE[0] / 2 + 5
+                    )
+                elif not current_node and layer_idx == 0:
+                    c_x = node_x + NODE_SIZE[0] / 2
+                    c_y = node_y + NODE_SIZE[1] / 2
+                    pygame.draw.circle(
+                        screen, "black", (c_x, c_y), NODE_SIZE[0] / 2 + 5
+                    )
+                screen.blit(vfx, (node_x, node_y))
 
     def render_map(self, screen: pygame.surface.Surface, current_node=None):
         """

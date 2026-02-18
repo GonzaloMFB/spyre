@@ -81,8 +81,12 @@ class GameStateMachine:
         # Check node positions ONLY ABOVE CURRENT LAYER.
         # No need to interact with the other nodes.
         # Ignore last layer.
-        if self.current_layer < 15:
-            for node in self.act_map.layers[self.current_layer + 1]:
+        target_layer = self.current_layer
+        if target_layer > 0:
+            # Allow users to click
+            target_layer += 1
+        if self.current_layer < len(self.act_map.layers) - 1:
+            for node in self.act_map.layers[target_layer]:
                 if not node:
                     continue
                 if (
