@@ -6,15 +6,12 @@ from entities.entity import Entity
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 
-STARTER_DECKS = {"knight": {"strike": 5, "defend": 4, "bash": 1}}
-
 
 class Character(Entity):
     def __init__(self, name, color, base_hp):
         super().__init__(base_hp)
         self.name = name
         self.color = color
-        self.deck = STARTER_DECKS.get(name, []) or []
         self.max_energy = 3
         self.current_energy = self.max_energy
 

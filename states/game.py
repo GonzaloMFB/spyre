@@ -1,19 +1,48 @@
 import pygame
-from states.states import GameState
+
+from cards.cards import generate_card
+from entities.characters import generate_char
+from states.battle import BattleStateMachine
+from states.states import GameState, BattleState
+
+
 from scenes.map import Map, Node, NODE_SIZE
+
+STARTER_DECKS = {"knight": {"strike": 5, "defend": 4, "bash": 1}}
+
+
+def generate_deck(name):
+    deck = []
+    starter = STARTER_DECKS.get(name)
+    for card_name, num in starter.items():
+        for _ in range(num):
+            deck.append(generate_card(card_name))
+    return deck
 
 
 class GameStateMachine:
     def __init__(self):
+        # Base
         self.current_state = GameState.ROOM  # Change to title when the game loads
-        self.allow_navigation = True
-        self.map_overlay_open = False
-        self.deck_overlay_open = False
-        self.settings_overlay_open = False
+        # For now, init char here. Change it later on character select.
+        player_class = "knight"
+        self.player = generate_char(player_class)
+        self.deck = generate_deck(player_class)
+
+        # Map-related
         self.act_map = Map()
         self.act_map.generate_map()
         self.current_layer = 0
         self.curr_node = None
+        self.allow_navigation = True
+        self.map_overlay_open = False
+
+        # Other overlays
+        self.deck_overlay_open = False
+        self.settings_overlay_open = False
+
+        # Sub state machines
+        self.battle_sm = None
 
     def update(self, events: list[pygame.event.Event]):
         # These are the ones we can open at any time.
@@ -33,7 +62,9 @@ class GameStateMachine:
         elif self.current_state == GameState.ROOM:
             self._room(events)
         elif self.current_state == GameState.BATTLE:
-            pass
+            if not self.battle_sm:
+                self.battle_sm = BattleStateMachine(self.player, self.deck)
+            self._battle(events)
         elif self.current_state == GameState.SHOP:
             pass
         elif self.current_state == GameState.EVENT:
@@ -59,6 +90,15 @@ class GameStateMachine:
 
     def _character_select(self, events: list[pygame.event.Event]):
         pass
+
+    def _battle(self, events: list[pygame.event.Event]):
+        self.battle_sm.update(events)
+        if self.battle_sm.current_state == BattleState.BATTLE_END:
+            # Clear battle and change status to room.
+            # Need to call again to make sure the update for BATTLE_END happens.
+            self.battle_sm.update(events)
+            self.battle_sm = None
+            self.current_state = GameState.ROOM
 
     def _room(self, events: list[pygame.event.Event]):
         for event in events:

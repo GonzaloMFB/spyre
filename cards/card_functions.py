@@ -21,6 +21,6 @@ def apply_vuln(target: Enemy, value: int):
 # Map format is (function, needs_player, needs_target)
 CARD_FUNC = {
     "damage": (damage, True, True),
-    "block": (damage, True, False),
+    "block": (block, True, False),
     "apply_vuln": (apply_vuln, False, True),
 }

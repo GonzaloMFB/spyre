@@ -232,43 +232,44 @@ def render_battle_state(screen, battle_sm: BattleStateMachine):
         y += 32
 
 
-sample_deck = [
-    generate_card("strike"),
-    # generate_card("defend"),
-    generate_card("bash"),
-]
+if __name__ == "__main__":
+    sample_deck = [
+        generate_card("strike"),
+        # generate_card("defend"),
+        generate_card("bash"),
+    ]
 
-player = generate_char("knight")
+    player = generate_char("knight")
 
-# pygame setup
-pygame.init()
-screen = pygame.display.set_mode((1280, 720))
-clock = pygame.time.Clock()
-running = True
+    # pygame setup
+    pygame.init()
+    screen = pygame.display.set_mode((1280, 720))
+    clock = pygame.time.Clock()
+    running = True
 
-battle = None
-active_battle = True
+    battle = None
+    active_battle = True
 
-while running:
-    events = pygame.event.get()
-    for event in events:
-        if event.type == pygame.QUIT:
-            running = False
-    screen.fill("gray45")
-    if not battle and active_battle:
-        battle = BattleStateMachine(player, sample_deck)
-    if battle:
-        if battle.current_state == BattleState.BATTLE_END:
+    while running:
+        events = pygame.event.get()
+        for event in events:
+            if event.type == pygame.QUIT:
+                running = False
+        screen.fill("gray45")
+        if not battle and active_battle:
+            battle = BattleStateMachine(player, sample_deck)
+        if battle:
+            if battle.current_state == BattleState.BATTLE_END:
+                render_battle_state(screen, battle)
+                battle.update(events)
+                battle = None
+                active_battle = False
+                continue
             render_battle_state(screen, battle)
             battle.update(events)
-            battle = None
-            active_battle = False
-            continue
-        render_battle_state(screen, battle)
-        battle.update(events)
 
-    pygame.display.flip()
+        pygame.display.flip()
 
-    clock.tick(60)
+        clock.tick(60)
 
-pygame.quit()
+    pygame.quit()
