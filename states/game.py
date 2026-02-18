@@ -91,6 +91,9 @@ class GameStateMachine:
     def _character_select(self, events: list[pygame.event.Event]):
         pass
 
+    def _event(self, events: list[pygame.event.Event]):
+        pass
+
     def _battle(self, events: list[pygame.event.Event]):
         self.battle_sm.update(events)
         if self.battle_sm.current_state == BattleState.BATTLE_END:

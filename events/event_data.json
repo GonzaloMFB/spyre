@@ -1,0 +1,18 @@
+[
+    {
+        "id": 1,
+        "event_text": "You found a pot of gold!",
+        "choices": [
+            {
+                "choice_text": "Pick up the gold",
+                "effects": [],
+                "outcome_text": "You earned some gold!"
+            },
+            {
+                "choice_text": "Leave, it could be a trap.",
+                "effects": [],
+                "outcome_text": "You left, leaving behind a pretty sizeable treasure..."
+            }
+        ]
+    }
+]
