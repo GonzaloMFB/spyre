@@ -2,8 +2,10 @@ import pygame
 
 from cards.cards import generate_card
 from entities.characters import generate_char
+from events.event import GameEvent
 from states.battle import BattleStateMachine
 from states.states import GameState, BattleState
+
 
 
 from scenes.map import Map, Node, NODE_SIZE
@@ -43,6 +45,7 @@ class GameStateMachine:
 
         # Sub state machines
         self.battle_sm = None
+        self.game_event = None
 
     def update(self, events: list[pygame.event.Event]):
         # These are the ones we can open at any time.
@@ -68,7 +71,9 @@ class GameStateMachine:
         elif self.current_state == GameState.SHOP:
             pass
         elif self.current_state == GameState.EVENT:
-            pass
+            if not self.game_event:
+                self.game_event = 
+            self._handle_game_event(events)
         elif self.current_state == GameState.REWARD:
             pass
         elif self.current_state == GameState.GAME_OVER:
@@ -91,7 +96,7 @@ class GameStateMachine:
     def _character_select(self, events: list[pygame.event.Event]):
         pass
 
-    def _event(self, events: list[pygame.event.Event]):
+    def _handle_game_event(self, events: list[pygame.event.Event]):
         pass
 
     def _battle(self, events: list[pygame.event.Event]):

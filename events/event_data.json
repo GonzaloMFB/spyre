@@ -1,6 +1,7 @@
 [
     {
         "id": 1,
+        "title": "Pot of Greed",
         "event_text": "You found a pot of gold!",
         "choices": [
             {
