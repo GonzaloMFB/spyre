@@ -29,17 +29,26 @@ class GameEvent:
         self.complete = False
         self.window = pygame.surface.Surface(EVENT_WINDOW_SIZE)
         self.choices: list[TextBox] = []
-        for idx, choice in enumerate(self.data.get("choices")):
+        self.outcomes: list[TextBox] = []
+        self.continue_box: TextBox = TextBox(
+            "Continue", (80, 40), (50, 50), clickable=True
+        )
+        self.chosen = -1
+        for idx, entry in enumerate(self.data.get("choices")):
             origin = (
                 50,
                 3 * self.window.get_height() // 4
                 + idx * CHOICE_BOX_SIZE[1]
                 + (idx * 10),
             )
-            box = TextBox(
-                choice.get("choice_text"), CHOICE_BOX_SIZE, origin, clickable=True
+            choice = TextBox(
+                entry.get("choice_text"), CHOICE_BOX_SIZE, origin, clickable=True
             )
-            self.choices.append(box)
+            outcome = TextBox(
+                entry.get("outcome_text"), CHOICE_BOX_SIZE, origin, clickable=False
+            )
+            self.choices.append(choice)
+            self.outcomes.append(outcome)
 
     def render_event(self, screen):
         # Render square
@@ -53,8 +62,13 @@ class GameEvent:
             event_text_sf,
             (50, (self.window.get_height() - event_text_sf.get_height()) // 2),
         )
-        for _, box in enumerate(self.choices):
+        if not self.has_chosen:
+            for _, box in enumerate(self.choices):
+                self.window.blit(box.render(), box.origin)
+        else:
+            box = self.outcomes[self.chosen]
             self.window.blit(box.render(), box.origin)
+            self.window.blit(self.continue_box.render(), self.continue_box.origin)
         screen.blit(self.window, (0, 0))
 
 
@@ -73,6 +87,18 @@ class TextBox:
         self.surface.fill("blue")
         self.surface.blit(render_debug_text(self.text), origin)
         return self.surface
+
+    def is_clicked(self, mouse_pos):
+        in_x = (
+            self.origin[0] <= mouse_pos[0] <= self.origin[0] + self.surface.get_width()
+        )
+        in_y = (
+            self.origin[1] <= mouse_pos[1] <= self.origin[1] + self.surface.get_height()
+        )
+        if self.clickable and in_x and in_y:
+            print("Clicked choice box!")
+            return True
+        return False
 
 
 class Title:

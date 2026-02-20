@@ -5,6 +5,7 @@ NODE_TYPES = ("fight", "shop", "event", "chest")
 
 NODE_SIZE = (10, 10)
 NODE_SPACE = 32
+FIRST_NODE = "fight"
 
 
 class Node:
@@ -56,7 +57,9 @@ class Map:
             for layer_idx, selected_node in enumerate(path):
                 if not self.layers[layer_idx][selected_node]:
                     # Create node.
-                    node_type = "fight" if layer_idx == 0 else random.choice(NODE_TYPES)
+                    node_type = (
+                        FIRST_NODE if layer_idx == 0 else random.choice(NODE_TYPES)
+                    )
                     self.layers[layer_idx][selected_node] = Node(node_type)
         # Connect nodes based on paths
         for path in paths:

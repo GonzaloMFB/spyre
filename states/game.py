@@ -7,7 +7,6 @@ from states.battle import BattleStateMachine
 from states.states import GameState, BattleState
 
 
-
 from scenes.map import Map, Node, NODE_SIZE
 
 STARTER_DECKS = {"knight": {"strike": 5, "defend": 4, "bash": 1}}
@@ -23,9 +22,10 @@ def generate_deck(name):
 
 
 class GameStateMachine:
-    def __init__(self):
+    def __init__(self, screen):
         # Base
         self.current_state = GameState.ROOM  # Change to title when the game loads
+        self.screen = screen
         # For now, init char here. Change it later on character select.
         player_class = "knight"
         self.player = generate_char(player_class)
@@ -72,7 +72,7 @@ class GameStateMachine:
             pass
         elif self.current_state == GameState.EVENT:
             if not self.game_event:
-                self.game_event = 
+                self.game_event = GameEvent()
             self._handle_game_event(events)
         elif self.current_state == GameState.REWARD:
             pass
@@ -97,7 +97,25 @@ class GameStateMachine:
         pass
 
     def _handle_game_event(self, events: list[pygame.event.Event]):
-        pass
+        end_event = False
+        for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                # Check if we clicked any, and set the state of that box to clicked.
+                if not self.game_event.has_chosen:
+                    for idx, choice in enumerate(self.game_event.choices):
+                        clicked = choice.is_clicked(event.pos)
+                        if clicked:
+                            self.game_event.has_chosen = True
+                            self.game_event.chosen = idx
+                            break
+                else:
+                    # User should be able to click continue or something.
+                    if self.game_event.continue_box:
+                        if self.game_event.continue_box.is_clicked(event.pos):
+                            end_event = True
+        self.game_event.render_event(self.screen)
+        if end_event:
+            self.current_state = GameState.ROOM
 
     def _battle(self, events: list[pygame.event.Event]):
         self.battle_sm.update(events)
@@ -124,6 +142,7 @@ class GameStateMachine:
                     self._transition_to_node_state(clicked_node)
                     self.map_overlay_open = False
                     self.allow_navigation = False
+                    self.current_layer += 1
 
     def _get_clicked_node(self, mouse_pos):
         # Check node positions ONLY ABOVE CURRENT LAYER.
@@ -142,7 +161,6 @@ class GameStateMachine:
                 ) and (
                     node.node_pos[1] <= mouse_pos[1] <= node.node_pos[1] + NODE_SIZE[1]
                 ):
-                    print("Clicked a valid Node!")
                     return node
         return None
 
@@ -181,7 +199,7 @@ screen = pygame.display.set_mode((1280, 720))
 clock = pygame.time.Clock()
 running = True
 
-game_sm = GameStateMachine()
+game_sm = GameStateMachine(screen)
 
 while running:
     events = pygame.event.get()
