@@ -5,6 +5,7 @@ from entities.characters import generate_char
 from events.event import GameEvent
 from states.battle import BattleStateMachine
 from states.states import GameState, BattleState
+from scenes.topbar import TopBar
 
 
 from scenes.map import Map, Node, NODE_SIZE
@@ -26,6 +27,8 @@ class GameStateMachine:
         # Base
         self.current_state = GameState.ROOM  # Change to title when the game loads
         self.screen = screen
+        self.name = "Tester"
+
         # For now, init char here. Change it later on character select.
         player_class = "knight"
         self.player = generate_char(player_class)
@@ -46,6 +49,8 @@ class GameStateMachine:
         # Sub state machines
         self.battle_sm = None
         self.game_event = None
+
+        self.topbar = TopBar(self.player.current_hp, self.player.max_hp, 95)
 
     def update(self, events: list[pygame.event.Event]):
         # These are the ones we can open at any time.
@@ -180,6 +185,9 @@ class GameStateMachine:
             elif event.key == pygame.K_ESCAPE and self.map_overlay_open:
                 self.map_overlay_open = False
 
+    def render_top_bar(self):
+        self.screen.blit(self.topbar.render(), (0, 0))
+
 
 def render_debug_text(text):
     return pygame.font.SysFont("arial", 18).render(text, True, (0, 0, 0))
@@ -208,6 +216,7 @@ while running:
             running = False
     screen.fill("gray45")
     if game_sm:
+        game_sm.render_top_bar()
         render_game_state(screen, game_sm)
         game_sm.update(events)
         if game_sm.map_overlay_open:

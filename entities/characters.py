@@ -14,6 +14,7 @@ class Character(Entity):
         self.color = color
         self.max_energy = 3
         self.current_energy = self.max_energy
+        self.gold = 90
 
 
 def load_character_data():

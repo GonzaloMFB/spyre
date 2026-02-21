@@ -123,3 +123,14 @@ def generate_card(name: str):
     template = card_data[name]
     instance_data = deepcopy(template)
     return Card(name=name, **instance_data)
+
+
+def get_card_names(color=None):
+    if not color:
+        return list(card_data.keys())
+    # Filter by color if passed
+    names = []
+    for name, data in card_data.items():
+        if data.get("color") == color:
+            names.append(name)
+    return name
