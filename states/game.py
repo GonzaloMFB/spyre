@@ -112,7 +112,12 @@ class GameStateMachine:
                         if clicked:
                             self.game_event.has_chosen = True
                             self.game_event.chosen = idx
-                            break
+                            for name, val in self.game_event.data.get("choices")[
+                                idx
+                            ].get("effects"):
+                                print(name, val)
+                                self.game_event.execute_effect(self, name, val)
+
                 else:
                     # User should be able to click continue or something.
                     if self.game_event.continue_box:
@@ -219,6 +224,12 @@ while running:
         game_sm.render_top_bar()
         render_game_state(screen, game_sm)
         game_sm.update(events)
+        game_sm.topbar.update(
+            game_sm.player.current_hp,
+            game_sm.player.max_hp,
+            game_sm.player.gold,
+            game_sm.current_layer,
+        )
         if game_sm.map_overlay_open:
             game_sm.act_map.render_map(screen, game_sm.curr_node)
 

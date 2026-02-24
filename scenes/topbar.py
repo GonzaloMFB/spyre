@@ -56,18 +56,24 @@ class TopBar:
     def __init__(self, curr_hp, max_hp, gold):
         self.surface = pygame.surface.Surface(TOPBAR_SIZE)
         self.origin = (0, 0)
-        self.health = HealthDisplay(curr_hp, max_hp)
-        self.gold = GoldDisplay(gold)
-        self.pots = PotionsDisplay()
+        self.health_ui = HealthDisplay(curr_hp, max_hp)
+        self.gold_ui = GoldDisplay(gold)
+        self.pots_ui = PotionsDisplay()
         self.layer = 0
+
+    def update(self, curr_hp, max_hp, gold, layer):
+        self.gold_ui.gold = gold
+        self.health_ui.max_health = max_hp
+        self.health_ui.current_health = curr_hp
+        self.layer = layer
 
     def render(self):
         # Returns surface to blit onto main screen
         # Top bar has five different sections
         self.surface.fill("white")
         self.surface.blit(self._render_name(), (50, 15))
-        self.surface.blit(self.health.render(), (150, 10))
-        self.surface.blit(self.gold.render(), (250, 10))
+        self.surface.blit(self.health_ui.render(), (150, 10))
+        self.surface.blit(self.gold_ui.render(), (250, 10))
         # self.surface.blit(self.pots.render(), (250, 15))
         bg = self._render_layer()
         self.surface.blit(bg, ((self.surface.get_width() - bg.get_width()) // 2, 15))

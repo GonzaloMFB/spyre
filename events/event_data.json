@@ -6,7 +6,7 @@
         "choices": [
             {
                 "choice_text": "Pick up the gold",
-                "effects": [],
+                "effects": [["add_gold", 20]],
                 "outcome_text": "You earned some gold!"
             },
             {

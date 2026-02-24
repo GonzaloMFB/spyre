@@ -4,6 +4,7 @@ import os
 
 import pygame
 
+from events.event_func import EVENT_FUNC
 from utils.utils import render_debug_text
 
 DIR = os.path.dirname(os.path.abspath(__file__))
@@ -49,6 +50,11 @@ class GameEvent:
             )
             self.choices.append(choice)
             self.outcomes.append(outcome)
+
+    def execute_effect(self, game, effect, val):
+        func = EVENT_FUNC[effect]
+        print(f"Executing event {effect}")
+        func(game, val)
 
     def render_event(self, screen):
         # Render square
