@@ -11,9 +11,10 @@ class Chest:
             os.path.join(DIR, "../assets/placeholder_continue.png")
         )
         self.chest_icon = pygame.image.load(
-            os.path.join(DIR, "../assets/placeholder_chest.png")
+            os.path.join(DIR, "../assets/placeholder_chest1.png")
         )
         self.cont_coords = None
+        self.chest_coords = None
         self.open = False
 
     def is_continue_clicked(self, mouse_pos):
@@ -35,8 +36,39 @@ class Chest:
             return True
         return False
 
+    def open_chest(self):
+        # TODO: give the player a reward for opening
+        self.open = True
+        self.chest_icon = pygame.image.load(
+            os.path.join(DIR, "../assets/placeholder_chest2.png")
+        )
+
+    def is_chest_clicked(self, mouse_pos):
+        if not self.chest_coords:
+            print("No coords set")
+            return False
+        in_x = (
+            self.chest_coords[0]
+            <= mouse_pos[0]
+            <= self.chest_coords[0] + self.chest_icon.get_width()
+        )
+        in_y = (
+            self.chest_coords[1]
+            <= mouse_pos[1]
+            <= self.chest_coords[1] + self.chest_icon.get_height()
+        )
+        if in_x and in_y:
+            print("Clicked continue box!")
+            return True
+        return False
+
     def render(self, screen):
         # For chests, the option to continue and skip it is always present.
+        self.chest_coords = (
+            3 * (screen.get_width() - self.chest_icon.get_width()) // 4,
+            screen.get_height() // 2,
+        )
+        screen.blit(self.chest_icon, self.chest_coords)
         self.cont_coords = (
             screen.get_width() - self.continue_button.get_width(),
             screen.get_height() // 2,

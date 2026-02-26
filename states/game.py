@@ -109,11 +109,12 @@ class GameStateMachine:
         end_chest = False
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if not self.chest.open:
-                    print("Reached HERE")
-                    if self.chest.is_continue_clicked(event.pos):
-                        print("Was clicked")
-                        end_chest = True
+                if self.chest.is_continue_clicked(event.pos):
+                    print("Was clicked")
+                    end_chest = True
+                elif not self.chest.open:
+                    if self.chest.is_chest_clicked(event.pos):
+                        self.chest.open_chest()
         self.chest.render(self.screen)
         if end_chest:
             self.current_state = GameState.ROOM
