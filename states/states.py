@@ -9,8 +9,9 @@ class GameState(Enum):
     REWARD = 4
     SHOP = 5
     EVENT = 6
-    GAME_OVER = 7
-    QUIT_GAME = 8
+    CHEST = 7
+    GAME_OVER = 8
+    QUIT_GAME = 9
 
 
 class BattleState(Enum):

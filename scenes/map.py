@@ -5,7 +5,7 @@ NODE_TYPES = ("fight", "shop", "event", "chest")
 
 NODE_SIZE = (10, 10)
 NODE_SPACE = 32
-FIRST_NODE = "event"
+FIRST_NODE = "chest"
 
 
 class Node:

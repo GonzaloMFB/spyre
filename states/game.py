@@ -5,6 +5,8 @@ from entities.characters import generate_char
 from events.event import GameEvent
 from states.battle import BattleStateMachine
 from states.states import GameState, BattleState
+from scenes.chest import Chest
+from scenes.shop import Shop
 from scenes.topbar import TopBar
 
 
@@ -37,7 +39,7 @@ class GameStateMachine:
         # Map-related
         self.act_map = Map()
         self.act_map.generate_map()
-        self.current_layer = 0
+        self.current_layer = -1
         self.curr_node = None
         self.allow_navigation = True
         self.map_overlay_open = False
@@ -49,6 +51,8 @@ class GameStateMachine:
         # Sub state machines
         self.battle_sm = None
         self.game_event = None
+        self.shop = None
+        self.chest = None
 
         self.topbar = TopBar(self.player.current_hp, self.player.max_hp, 95)
 
@@ -73,8 +77,14 @@ class GameStateMachine:
             if not self.battle_sm:
                 self.battle_sm = BattleStateMachine(self.player, self.deck)
             self._battle(events)
+        elif self.current_state == GameState.CHEST:
+            if not self.chest:
+                self.chest = Chest()
+            self._chest(events)
         elif self.current_state == GameState.SHOP:
-            pass
+            if not self.shop:
+                self.shop = Shop()
+            self._shop(events)
         elif self.current_state == GameState.EVENT:
             if not self.game_event:
                 self.game_event = GameEvent()
@@ -94,6 +104,34 @@ class GameStateMachine:
             pass
         elif self.settings_overlay_open:
             pass
+
+    def _chest(self, events: list[pygame.event.Event]):
+        end_chest = False
+        for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if not self.chest.open:
+                    print("Reached HERE")
+                    if self.chest.is_continue_clicked(event.pos):
+                        print("Was clicked")
+                        end_chest = True
+        self.chest.render(self.screen)
+        if end_chest:
+            self.current_state = GameState.ROOM
+            self.allow_navigation = True
+            self.chest = None
+
+    def _shop(self, events: list[pygame.event.Event]):
+        end_shop = False
+        for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if not self.shop.open:
+                    if self.shop.is_continue_clicked(event.pos):
+                        end_shop = True
+        self.shop.render(self.screen)
+        if end_shop:
+            self.current_state = GameState.ROOM
+            self.allow_navigation = True
+            self.shop = None
 
     def _title_screen(self, events: list[pygame.event.Event]):
         pass
@@ -126,6 +164,8 @@ class GameStateMachine:
         self.game_event.render_event(self.screen)
         if end_event:
             self.current_state = GameState.ROOM
+            self.allow_navigation = True
+            self.game_event = None
 
     def _battle(self, events: list[pygame.event.Event]):
         self.battle_sm.update(events)
@@ -135,6 +175,7 @@ class GameStateMachine:
             self.battle_sm.update(events)
             self.battle_sm = None
             self.current_state = GameState.ROOM
+            self.allow_navigation = True
 
     def _room(self, events: list[pygame.event.Event]):
         for event in events:
@@ -144,6 +185,7 @@ class GameStateMachine:
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN and self.allow_navigation:
                 clicked_node = self._get_clicked_node(event.pos)
+                print("Clicked node:", clicked_node)
                 if clicked_node and self.act_map.can_navigate_to(
                     clicked_node, self.curr_node
                 ):
@@ -158,12 +200,8 @@ class GameStateMachine:
         # Check node positions ONLY ABOVE CURRENT LAYER.
         # No need to interact with the other nodes.
         # Ignore last layer.
-        target_layer = self.current_layer
-        if target_layer > 0:
-            # Allow users to click
-            target_layer += 1
         if self.current_layer < len(self.act_map.layers) - 1:
-            for node in self.act_map.layers[target_layer]:
+            for node in self.act_map.layers[self.current_layer + 1]:
                 if not node:
                     continue
                 if (
@@ -181,6 +219,10 @@ class GameStateMachine:
             self.current_state = GameState.EVENT
         elif clicked_node.node_type == "shop":
             self.current_state = GameState.SHOP
+        elif clicked_node.node_type == "chest":
+            self.current_state = GameState.CHEST
+        else:
+            print(f"No correct node type. Node type was: {clicked_node.node_type}")
 
     def _handle_map_open(self, event):
         if event.type == pygame.KEYDOWN:
@@ -204,6 +246,8 @@ def render_game_state(screen, game_sm: GameStateMachine):
     screen.blit(render_debug_text(f"Map open? - {game_sm.map_overlay_open}"), (x, 16))
     pos_str = f"Current layer - {game_sm.current_layer}"
     screen.blit(render_debug_text(pos_str), (x, 32))
+    allow_nav = f"Allow navigation? {game_sm.allow_navigation}"
+    screen.blit(render_debug_text(allow_nav), (x, 48))
 
 
 # pygame setup
