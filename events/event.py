@@ -10,7 +10,7 @@ from utils.utils import render_debug_text
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 
-EVENT_WINDOW_SIZE = (900, 450)
+EVENT_WINDOW_SIZE = (900, 411)
 
 CHOICE_BOX_SIZE = (600, 50)
 
@@ -29,7 +29,12 @@ class GameEvent:
         self.data = fetch_game_event()
         self.has_chosen = False
         self.complete = False
-        self.window = pygame.surface.Surface(EVENT_WINDOW_SIZE)
+        # self.window = pygame.surface.Surface(EVENT_WINDOW_SIZE)
+        self._window_orig = pygame.image.load(
+            os.path.join(DIR, "../assets/event_panel.png")
+        )
+        self._window_orig = pygame.transform.scale(self._window_orig, EVENT_WINDOW_SIZE)
+        self.window = self._window_orig.copy()
         self.choices: list[TextBox] = []
         self.outcomes: list[TextBox] = []
         self.cont_coords = None
@@ -41,7 +46,7 @@ class GameEvent:
         for idx, entry in enumerate(self.data.get("choices")):
             origin = (
                 50,
-                3 * self.window.get_height() // 4
+                2 * self.window.get_height() // 3
                 + idx * CHOICE_BOX_SIZE[1]
                 + (idx * 10),
             )
@@ -78,14 +83,13 @@ class GameEvent:
         return False
 
     def render_event(self, screen):
-        # Render square
-        self.window.fill("white")
-        title_sf = render_debug_text(self.data.get("title"))
+        self.window = self._window_orig.copy()
+        title_sf = render_debug_text(self.data.get("title"), (255, 255, 255))
         self.window.blit(
             title_sf,
-            ((self.window.get_width() - title_sf.get_width()) // 2, 0),
+            ((self.window.get_width() - title_sf.get_width()) // 4, 20),
         )
-        event_text_sf = render_debug_text(self.data.get("event_text"))
+        event_text_sf = render_debug_text(self.data.get("event_text"), (255, 255, 255))
         self.window.blit(
             event_text_sf,
             (50, (self.window.get_height() - event_text_sf.get_height()) // 2),
@@ -108,15 +112,19 @@ class TextBox:
     def __init__(self, text, dimensions, origin, clickable=False):
         # Origin: top leftmost coord of the surface on parent surface
         self.text = text
-        self.surface = pygame.surface.Surface(dimensions)
+        self._surface = pygame.image.load(
+            os.path.join(DIR, "../assets/event_button.png")
+        )
+        self._surface = pygame.transform.scale(self._surface, dimensions)
+        self.surface = self._surface.copy()
         self.origin = origin
         self.clickable = clickable
 
     def render(self, origin=None):
         # Fill with color for now and render the text on top.
+        self.surface = self._surface.copy()
         if not origin:
-            origin = (10, self.surface.get_height() // 2)
-        self.surface.fill("blue")
+            origin = (self.surface.get_width() // 20, self.surface.get_height() // 3)
         self.surface.blit(render_debug_text(self.text), origin)
         return self.surface
 

@@ -1,5 +1,7 @@
 import pygame
 
 
-def render_debug_text(text):
-    return pygame.font.SysFont("arial", 18).render(text, True, (0, 0, 0))
+def render_debug_text(text, color=None):
+    if not color:
+        color = (0, 0, 0)
+    return pygame.font.SysFont("arial", 18).render(text, True, color)
