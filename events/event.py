@@ -5,6 +5,7 @@ import os
 import pygame
 
 from events.event_func import EVENT_FUNC
+from scenes.topbar import TOPBAR_SIZE
 from utils.utils import render_debug_text
 
 DIR = os.path.dirname(os.path.abspath(__file__))
@@ -31,9 +32,11 @@ class GameEvent:
         self.window = pygame.surface.Surface(EVENT_WINDOW_SIZE)
         self.choices: list[TextBox] = []
         self.outcomes: list[TextBox] = []
-        self.continue_box: TextBox = TextBox(
-            "Continue", (80, 40), (50, 50), clickable=True
+        self.cont_coords = None
+        self.continue_button = pygame.image.load(
+            os.path.join(DIR, "../assets/placeholder_continue.png")
         )
+        self.window_rect = pygame.Rect(0, TOPBAR_SIZE[1], *EVENT_WINDOW_SIZE)
         self.chosen = -1
         for idx, entry in enumerate(self.data.get("choices")):
             origin = (
@@ -53,15 +56,34 @@ class GameEvent:
 
     def execute_effect(self, game, effect, val):
         func = EVENT_FUNC[effect]
-        print(f"Executing event {effect}")
         func(game, val)
+
+    def is_continue_clicked(self, mouse_pos):
+        if not self.cont_coords:
+            print("No coords set")
+            return False
+        in_x = (
+            self.cont_coords[0]
+            <= mouse_pos[0]
+            <= self.cont_coords[0] + self.continue_button.get_width()
+        )
+        in_y = (
+            self.cont_coords[1]
+            <= mouse_pos[1]
+            <= self.cont_coords[1] + self.continue_button.get_height()
+        )
+        if in_x and in_y:
+            print("Clicked continue box!")
+            return True
+        return False
 
     def render_event(self, screen):
         # Render square
         self.window.fill("white")
         title_sf = render_debug_text(self.data.get("title"))
         self.window.blit(
-            title_sf, ((self.window.get_width() - title_sf.get_width()) // 2, 0)
+            title_sf,
+            ((self.window.get_width() - title_sf.get_width()) // 2, 0),
         )
         event_text_sf = render_debug_text(self.data.get("event_text"))
         self.window.blit(
@@ -70,12 +92,16 @@ class GameEvent:
         )
         if not self.has_chosen:
             for _, box in enumerate(self.choices):
-                self.window.blit(box.render(), box.origin)
+                self.window.blit(box.render(), (box.origin[0], box.origin[1]))
         else:
             box = self.outcomes[self.chosen]
             self.window.blit(box.render(), box.origin)
-            self.window.blit(self.continue_box.render(), self.continue_box.origin)
-        screen.blit(self.window, (0, 0))
+            self.cont_coords = (
+                screen.get_width() - self.continue_button.get_width(),
+                screen.get_height() // 2,
+            )
+            screen.blit(self.continue_button, self.cont_coords)
+        screen.blit(self.window, self.window_rect)
 
 
 class TextBox:

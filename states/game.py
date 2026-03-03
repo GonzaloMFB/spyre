@@ -144,10 +144,14 @@ class GameStateMachine:
         end_event = False
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
+                local_pos = (
+                    event.pos[0] - self.game_event.window_rect.x,
+                    event.pos[1] - self.game_event.window_rect.y,
+                )
                 # Check if we clicked any, and set the state of that box to clicked.
                 if not self.game_event.has_chosen:
                     for idx, choice in enumerate(self.game_event.choices):
-                        clicked = choice.is_clicked(event.pos)
+                        clicked = choice.is_clicked(local_pos)
                         if clicked:
                             self.game_event.has_chosen = True
                             self.game_event.chosen = idx
@@ -159,8 +163,8 @@ class GameStateMachine:
 
                 else:
                     # User should be able to click continue or something.
-                    if self.game_event.continue_box:
-                        if self.game_event.continue_box.is_clicked(event.pos):
+                    if self.game_event.continue_button:
+                        if self.game_event.is_continue_clicked(event.pos):
                             end_event = True
         self.game_event.render_event(self.screen)
         if end_event:
