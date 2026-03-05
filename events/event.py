@@ -6,7 +6,7 @@ import pygame
 
 from events.event_func import EVENT_FUNC
 from scenes.topbar import TOPBAR_SIZE
-from utils.utils import render_debug_text
+from utils.utils import render_debug_text, WINDOW_SIZE
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -29,7 +29,6 @@ class GameEvent:
         self.data = fetch_game_event()
         self.has_chosen = False
         self.complete = False
-        # self.window = pygame.surface.Surface(EVENT_WINDOW_SIZE)
         self._window_orig = pygame.image.load(
             os.path.join(DIR, "../assets/event_panel.png")
         )
@@ -41,7 +40,11 @@ class GameEvent:
         self.continue_button = pygame.image.load(
             os.path.join(DIR, "../assets/placeholder_continue.png")
         )
-        self.window_rect = pygame.Rect(0, TOPBAR_SIZE[1], *EVENT_WINDOW_SIZE)
+        self.window_rect = pygame.Rect(
+            (WINDOW_SIZE[0] - EVENT_WINDOW_SIZE[0]) // 2,
+            TOPBAR_SIZE[1] + (WINDOW_SIZE[1] - EVENT_WINDOW_SIZE[1]) // 3,
+            *EVENT_WINDOW_SIZE
+        )
         self.chosen = -1
         for idx, entry in enumerate(self.data.get("choices")):
             origin = (
@@ -139,11 +142,6 @@ class TextBox:
             print("Clicked choice box!")
             return True
         return False
-
-
-class Title:
-    def __init__(self):
-        pass
 
 
 if __name__ == "__main__":
