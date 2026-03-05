@@ -12,6 +12,7 @@ from scenes.topbar import TopBar
 
 from scenes.map import Map, Node, NODE_SIZE
 
+
 STARTER_DECKS = {"knight": {"strike": 5, "defend": 4, "bash": 1}}
 
 
@@ -54,7 +55,7 @@ class GameStateMachine:
         self.shop = None
         self.chest = None
 
-        self.topbar = TopBar(self.player.current_hp, self.player.max_hp, 95)
+        self.topbar = TopBar(self.player.current_hp, self.player.max_hp, 95, 3)
 
     def update(self, events: list[pygame.event.Event]):
         # These are the ones we can open at any time.
